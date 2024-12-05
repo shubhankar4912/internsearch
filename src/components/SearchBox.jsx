@@ -1,14 +1,12 @@
+// src/components/SearchBox.jsx
 import React, { useState } from "react";
-import data from "../data";
-
-
+import  data  from "../data";
+import BlogCard from "./BlogCard";
 
 const SearchBox = () => {
- 
-    
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-
+  const [sortOrder, setSortOrder] = useState("latest");
 
   const categories = [...new Set(data.map((blog) => blog.category))];
 
@@ -18,6 +16,14 @@ const SearchBox = () => {
         blog.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
       (selectedCategory ? blog.category === selectedCategory : true)
     );
+  });
+
+  const sortedBlogs = filteredBlogs.sort((a, b) => {
+    if (sortOrder === "latest") {
+      return new Date(b.date) - new Date(a.date);
+    } else {
+      return new Date(a.date) - new Date(b.date);
+    }
   });
 
   return (
@@ -32,11 +38,11 @@ const SearchBox = () => {
         />
       </div>
 
-      <div className="flex space-x-4 p-4">
+      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 p-4">
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Categories</option>
           {categories.map((category) => (
@@ -45,21 +51,22 @@ const SearchBox = () => {
             </option>
           ))}
         </select>
+
+        <select
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="latest">Latest</option>
+          <option value="oldest">Oldest</option>
+        </select>
       </div>
 
       <div className="w-full p-4">
-        {filteredBlogs.length > 0 ? (
+        {sortedBlogs.length > 0 ? (
           <ul className="space-y-4">
-            {filteredBlogs.map((blog) => (
-              <li
-                key={blog.id}
-                className="p-4 border rounded-md shadow hover:shadow-lg"
-              >
-                <h3 className="text-lg font-bold">{blog.title}</h3>
-                <p className="text-sm text-gray-600">
-                  {blog.category} - {blog.date}
-                </p>
-              </li>
+            {sortedBlogs.map((blog) => (
+              <BlogCard key={blog.id} blog={blog} />
             ))}
           </ul>
         ) : (
